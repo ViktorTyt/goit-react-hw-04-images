@@ -1,0 +1,10 @@
+.App {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-gap: 16px;
+}
+
+.Message {
+    font-size: 24px;
+    text-align: center;
+}
