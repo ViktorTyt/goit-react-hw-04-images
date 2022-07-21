@@ -1,112 +1,109 @@
-import { Component } from 'react';
 import { Searchbar, ImageGallery, Button, Loader, Modal } from 'components';
 import css from './App.module.css';
 import { ToastContainer } from 'react-toastify';
 import * as API from '../services/api';
+import { useState, useEffect } from 'react';
 
-export class App extends Component {
-  state = {
-    query: '',
-    page: 1,
-    perPage: 12,
-    imageList: [],
-    largeImage: '',
-    largeImageAlt: '',
-    isLoading: false,
-    isLoadMore: false,
-    error: null,
-  };
+export const App = () => {
+  // state = {
+  //   query: '',
+  //   page: 1,
+  //   perPage: 12,
+  //   imageList: [],
+  //   largeImage: '',
+  //   largeImageAlt: '',
+  //   isLoading: false,
+  //   isLoadMore: false,
+  //   error: null,
+  // };
 
-  componentDidUpdate(_, prevState) {
-    const { page, perPage, query } = this.state;
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(12);
+  const [imageList, setImageList] = useState([]);
+  const [largeImage, setLargeImage] = useState('');
+  const [largeImageAlt, setLargeImageAlt] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadMore, setIsLoadMore] = useState(false);
+  const [error, setError] = useState(null);
 
-    if (prevState.page !== page || prevState.query !== query) {
-      this.getImages(query, page, perPage);
-    }
-  }
+  // componentDidUpdate(_, prevState) {
+  //   const { page, perPage, query } = this.state;
 
-  getImages = async (query, page, perPage) => {
+  //   if (prevState.page !== page || prevState.query !== query) {
+  //     this.getImages(query, page, perPage);
+  //   }
+  // }
+  useEffect(() => {
+    getImages(query, page, perPage);
+
+    // return () => {
+    //   second
+    // }
+  }, [query, page, perPage]);
+
+  const getImages = async (query, page, perPage) => {
     if (!query) return;
 
-    this.setState({ isLoading: true });
+    setIsLoading(true);
 
     try {
       const { hits, totalHits } = await API.getImages(query, page, perPage);
 
       const limitPage = page < Math.ceil(totalHits / perPage);
 
-      this.setState(prevState => ({
-        imageList: [...prevState.imageList, ...hits],
-        isLoadMore: limitPage,
-      }));
+      setImageList(prevState => [...prevState, ...hits]);
+      setIsLoadMore(limitPage);
     } catch (error) {
-      this.setState({ error: error.message });
+      setError(error.message);
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
   };
 
-  handleSubmitForm = searchValue => {
-    this.setState({
-      query: searchValue,
-      imageList: [],
-      page: 1,
-    });
+  const handleSubmitForm = searchValue => {
+    setQuery(searchValue);
+    setImageList([]);
+    setPage(1);
   };
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const handleLoadMore = () => {
+    setPage(prevState => prevState + 1);
   };
 
-  handleModalOpen = id => {
-    const { largeImageURL, tags } = this.state.imageList.find(
-      image => image.id === id
-    );
+  const handleModalOpen = id => {
+    const { largeImageURL, tags } = imageList.find(image => image.id === id);
 
-    this.setState({
-      largeImage: largeImageURL,
-      largeImageAlt: tags,
-    });
+    setLargeImage(largeImageURL);
+    setLargeImageAlt(tags);
   };
 
-  handleModalClose = () => {
-    this.setState({
-      largeImage: '',
-      largeImageAlt: '',
-    });
+  const handleModalClose = () => {
+    setLargeImage('');
+    setLargeImageAlt('');
   };
 
-  render() {
-    const {
-      isLoading,
-      imageList,
-      largeImage,
-      largeImageAlt,
-      isLoadMore,
-      error,
-    } = this.state;
-    const { App, Message } = css;
+  const { App, Message } = css;
 
-    return (
-      <div className={App}>
-        <Searchbar onSubmit={this.handleSubmitForm} />
-        {imageList.length === 0 && !error && !isLoading && (
-          <p className={Message}>Sorry. There are no images ... 😭</p>
-        )}
-        {error && <p className={Message}> ❌ Something went wrong - {error}</p>}
+  return (
+    <div className={App}>
+      <Searchbar onSubmit={handleSubmitForm} />
+      {imageList.length === 0 && !error && !isLoading && (
+        <p className={Message}>Sorry. There are no images ... 😭</p>
+      )}
+      {error && <p className={Message}> ❌ Something went wrong - {error}</p>}
 
-        <ImageGallery imageList={imageList} openModal={this.handleModalOpen} />
-        {isLoading && <Loader />}
-        {isLoadMore && !isLoading && <Button loadMore={this.handleLoadMore} />}
-        {largeImage && (
-          <Modal
-            largeImage={largeImage}
-            largeImageAlt={largeImageAlt}
-            onClose={this.handleModalClose}
-          />
-        )}
-        <ToastContainer position="top-center" autoClose={2000} />
-      </div>
-    );
-  }
-}
+      <ImageGallery imageList={imageList} openModal={handleModalOpen} />
+      {isLoading && <Loader />}
+      {isLoadMore && !isLoading && <Button loadMore={handleLoadMore} />}
+      {largeImage && (
+        <Modal
+          largeImage={largeImage}
+          largeImageAlt={largeImageAlt}
+          onClose={handleModalClose}
+        />
+      )}
+      <ToastContainer position="top-center" autoClose={2000} />
+    </div>
+  );
+};
