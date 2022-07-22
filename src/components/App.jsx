@@ -19,7 +19,7 @@ export const App = () => {
 
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(12);
+  const [perPage] = useState(12);
   const [imageList, setImageList] = useState([]);
   const [largeImage, setLargeImage] = useState('');
   const [largeImageAlt, setLargeImageAlt] = useState('');
