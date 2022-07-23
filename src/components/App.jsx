@@ -5,18 +5,6 @@ import * as API from '../services/api';
 import { useState, useEffect } from 'react';
 
 export const App = () => {
-  // state = {
-  //   query: '',
-  //   page: 1,
-  //   perPage: 12,
-  //   imageList: [],
-  //   largeImage: '',
-  //   largeImageAlt: '',
-  //   isLoading: false,
-  //   isLoadMore: false,
-  //   error: null,
-  // };
-
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
   const [perPage] = useState(12);
@@ -27,19 +15,8 @@ export const App = () => {
   const [isLoadMore, setIsLoadMore] = useState(false);
   const [error, setError] = useState(null);
 
-  // componentDidUpdate(_, prevState) {
-  //   const { page, perPage, query } = this.state;
-
-  //   if (prevState.page !== page || prevState.query !== query) {
-  //     this.getImages(query, page, perPage);
-  //   }
-  // }
   useEffect(() => {
     getImages(query, page, perPage);
-
-    // return () => {
-    //   second
-    // }
   }, [query, page, perPage]);
 
   const getImages = async (query, page, perPage) => {
